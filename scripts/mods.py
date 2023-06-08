@@ -134,3 +134,87 @@ def print_formatted(*args):
     formatted_args = tuple(map(float2SI, args))
     print(*formatted_args, sep='    ')
 
+def graph(x, y, xlabel=r'$x$', ylabel=r'$y$', save=False, filename='figure.eps'):
+    """
+    plotting function without fancy coloring designed for LaTeX pdf file. You can save the plot as
+    eps file, which you can insert in LaTeX document.
+
+    Parameters
+    ----------
+    x: list[float]
+        x-axis values
+    y: list[float]
+        y-axis values
+    xlabel: str
+        lable for x-axis. The default string is raw string. In Python, an r string, also known as 
+        a raw string, is a string literal prefixed with the letter r. It is used to create strings 
+        that treat backslashes (\) as literal characters, rather than escape characters.
+    ylabel: str
+        same as xlabel except for y-axis
+    save: bool
+        If True, the plot will be saved as esp file. EPS is a file format used for vector graphics 
+        that is based on the PostScript language.
+    filename: str
+        filename for eps
+    """
+    # LaTeX font with size 9
+    plt.rcParams.update({
+        "text.usetex": True,
+        "font.family": 'serif',
+        "font.size": 9})
+
+    # plots y vs. x in black line with linesize 2 with the given axes
+    fig = plt.figure(figsize=(6,4), dpi=500)
+    ax = fig.add_subplot(111)
+
+    # minimums and maximums of x and y
+    xmin, xmax, ymin, ymax = min(x), max(x), min(y), max(y)
+    print(xmin, xmax, ymin, ymax, sep='    ')
+
+    # reset minimum and maximum of y if y-range does not contain 0
+    if 0 < ymin: ymin = -0.1*ymax
+    if ymax < 0: ymax = -0.1*ymin
+
+    # axis label coordinate adjustments
+    x_pos_for_y_label = -xmin/(xmax - xmin)
+    y_pos_for_x_label = -ymin/(ymax - ymin) + 0.02
+
+    # configures plot axes, labels and their positions with arrow axis tips
+    if (xmin <= 0) and (0 < xmax):
+        ax.spines['left'].set_position(('data', 0))
+        ax.set_ylabel(ylabel, rotation=0)
+        ax.yaxis.set_label_coords(x_pos_for_y_label, 1.02)
+        ax.plot(0, 1, "^k", markersize=3, transform=ax.get_xaxis_transform(), clip_on=False)
+    else:
+        ax.spines['left'].set_visible(False)
+        ax.set_ylabel(ylabel).set_visible(False)
+
+    ax.spines['bottom'].set_position(('data', 0))
+    ax.set_xlabel(xlabel)
+    ax.xaxis.set_label_coords(1.02, y_pos_for_x_label)
+    ax.plot(1, 0, ">k", markersize=3, transform=ax.get_yaxis_transform(), clip_on=False)
+
+    # plots y vs. x in black line with linesize 2 with the given axes
+    plt.plot(x, y, 'k-', linewidth=.5)
+    plt.axis([xmin, xmax, 1.1*ymin, 1.1*ymax])
+
+    # change the spine linewidth
+    plt.rcParams['axes.linewidth'] = 0.2
+
+    # deletes top and right spines
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+
+    # changes the size of ticks (both major and minor) to zero if ticks==False
+    ax.tick_params(axis=u'both', which=u'both', length=0)
+
+    # no tick labels
+    plt.xticks([])
+    plt.yticks([])
+
+    # save the figure as eps vector image if save==True
+    if (save == True):
+        plt.savefig(filename, format='eps', transparent=True)
+
+    # show the plot
+    plt.show()
