@@ -134,7 +134,18 @@ def print_formatted(*args):
     formatted_args = tuple(map(float2SI, args))
     print(*formatted_args, sep='    ')
 
-def graph(x, y, xlabel=r'$x$', ylabel=r'$y$', save=False, filename='figure.eps'):
+def graph(
+        x, 
+        y, 
+        xlabel=r'$x$', 
+        ylabel=r'$y$', 
+        xtick_locations = [], 
+        xtick_labels = [], 
+        ytick_locations = [], 
+        ytick_labels = [], 
+        save=False, 
+        filename='figure.eps',
+        show=True):
     """
     plotting function without fancy coloring designed for LaTeX pdf file. You can save the plot as
     eps file, which you can insert in LaTeX document.
@@ -151,11 +162,22 @@ def graph(x, y, xlabel=r'$x$', ylabel=r'$y$', save=False, filename='figure.eps')
         that treat backslashes (\) as literal characters, rather than escape characters.
     ylabel: str
         same as xlabel except for y-axis
+    xtick_locations: list[float]
+        horizontal locations of ticks. Default is empty list.
+    xtick_labels: list[str]
+        labels for xtick locations. There should be exactly the same number of labels as locations
+    ytick_locations: list[float]
+        vertical locations of ticks. Default is empty list.
+    xtick_labels: list[str]
+        labels for ytick locations. There should be exactly the same number of labels as locations
     save: bool
         If True, the plot will be saved as esp file. EPS is a file format used for vector graphics 
         that is based on the PostScript language.
     filename: str
         filename for eps
+    show: bool
+        show executes plt.show() inside graph function if True. Set it to false if you want to add
+        more plot options after graph execution
     """
     # LaTeX font with size 9
     plt.rcParams.update({
@@ -208,13 +230,14 @@ def graph(x, y, xlabel=r'$x$', ylabel=r'$y$', save=False, filename='figure.eps')
     # changes the size of ticks (both major and minor) to zero if ticks==False
     ax.tick_params(axis=u'both', which=u'both', length=0)
 
-    # no tick labels
-    plt.xticks([])
-    plt.yticks([])
+    # tick locations with labels
+    plt.xticks(xtick_locations, xtick_labels)
+    plt.yticks(ytick_locations, ytick_labels)
 
     # save the figure as eps vector image if save==True
     if (save == True):
         plt.savefig(filename, format='eps', transparent=True)
 
     # show the plot
-    plt.show()
+    if show: plt.show()
+
