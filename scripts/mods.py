@@ -240,4 +240,3 @@ def graph(
 
     # show the plot
     if show: plt.show()
-
