@@ -1,54 +1,22 @@
-# Git Practice 
+# Personal Python Module
 
-This github repository is created solely for me to become famliliar with git. 
+This git repository is for Python module that I personally created for my own use
 
 ## Getting Started
 
-Git is a distributed version-control system for tracking changes in source code during software development. It is designed for coordinating work among programmers, but it can be used to track changes in any set of files. Its goals include speed, data integrity, and support for distributed, non-linear workflows (https://en.wikipedia.org/wiki/Git).
+simply use import mods to import mods to use its methods
 
 ### Prerequisites
 
-Working PC (linux OS preferred) such as Ubuntu OS PC. For other platforms, please consult other sources.
+Python must be installed to use 
 
 ### Installing
 
-Git is already installed on many linux distribution (simple terminal command is given below). For other platforms, please google search on your own. 
-```
-sudo apt install git-all
-```
-
-If you are on Fedora (or any closely-related RPM-based distribution, such as RHEL or CentOS), you can use dnf
-```
-sudo dnf install git-all
-```
-
-## Git repository tests 
-
-Create git repository in the current directory:
-```
-git init
-```
-
-Within this directory you can start verson controlling with many git commands.
-
-### Remote repository 
-
-Create Github repository to which to push your git changes. Instructions on how to associate your git directory with Github repository will be provided. For convenient push, on Github repository site, go to deploy keys setting and set up SSH connection (If you already have public and private keys stored in your PC, use that. If you need public and private keys for SSH, use keygen program to generate them).
-
-### Git commands 
-
-Here are frequently used basic git commands. 
-```
-git add
-git commit
-git push
-```
-
-Git add command updates the index using the current content found in the working tree, to prepare the content staged for the next commit. Git commit records changes to the repository. git push updates remote refs along with associated objects (https://git-scm.com/docs).
+simply place the mods script from where you can easily import
 
 ## Built With
 
-* [framework](https://www.github.com/sejin8642/gitpractice) - The web framework used (for this repository, there are none)
+* [Python](https://www.python.org/) - Python interpreter must be installed
 
 ## Contributing
 
