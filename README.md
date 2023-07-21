@@ -4,7 +4,7 @@ This git repository is for Python module that I personally created for my own us
 
 ## Getting Started
 
-simply use import mods to import mods to use its methods
+simply use import mods to import mods to use its methods. Make usre of pathlib libray to manage directory path
 
 ### Prerequisites
 
