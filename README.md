@@ -8,7 +8,7 @@ simply use import mods to import mods to use its methods. Make usre of pathlib l
 
 ### Prerequisites
 
-Python must be installed to use 
+Python must be installed to use. The module is currently built with python 3.10 version 
 
 ### Installing
 
