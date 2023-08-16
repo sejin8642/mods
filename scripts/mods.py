@@ -240,3 +240,71 @@ def graph(
 
     # show the plot
     if show: plt.show()
+
+def interact_plot(
+    x,
+    Y, 
+    x_scale=1, 
+    y_scale=1, 
+    x_position=0,
+    y_position=0,
+    grid=False):
+    
+    """
+    function to plot multiple graphs, and it allows to change the scale and position of 
+    a part of the graph you are looking at. With ipywidgets.interact, this allows
+    to dynamically change the position and scale of the part of the graph to inspect the
+    data easily
+    
+    Parameter
+    ---------
+    x: numpy array[float]
+        Domain of the graph
+    y: numpy array[float]
+        Range of the graph
+    x_scale: float
+        Scale of the graph along x-axis to be viewed. The value is between 0 and 1 (default 1)
+    y_scale: float
+        Scale of the graph along y-axis to be viewed. The value is between 0 and 1 (default 1)
+    x_position: float
+        Horizontal position of graph view with respect to the center of the graph. The value is 
+        between -1 and 1 (default 0)
+    y_position: float
+        Vertical position of graph view with respect to the center of the graph. The value is 
+        between -1 and 1 (default 0)
+    grid: bool
+        If true, grid is shown on the graph (default False)
+    """
+    x_scale = np.clip(x_scale, 0, 1)
+    y_scale = np.clip(y_scale, 0, 1)
+    x_min = x[0]
+    x_max = x[-1]
+    plt.grid(grid)
+    y_min = np.min(Y[0])
+    y_max = np.max(Y[0])
+    
+    for y in Y:
+        y_min = np.min([y_min, np.min(y)])
+        y_max = np.max([y_max, np.max(y)])        
+        plt.plot(x, y)
+    
+    x_mid = (x_max + x_min)/2.0
+    y_mid = (y_max + y_min)/2.0
+    x_size_half = (x_max - x_min)/2.0
+    y_size_half = (y_max - y_min)/2.0
+
+    xi = x_mid - x_size_half*x_scale
+    xf = x_mid + x_size_half*x_scale
+    yi = y_mid - y_size_half*y_scale
+    yf = y_mid + y_size_half*y_scale
+    
+    x_diff = x_max - xf
+    y_diff = y_max - yf
+    
+    x_min = xi + x_diff*x_position
+    x_max = xf + x_diff*x_position
+    y_min = yi + y_diff*y_position
+    y_max = yf + y_diff*y_position
+
+    plt.axis([x_min, x_max, y_min, y_max])    
+    plt.show()
