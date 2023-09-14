@@ -97,8 +97,9 @@ def check(iterable, m=5):
 
 def float2SI(number):
     """
-    Returns a string of number represented with scientific prefixes. The precision is between 1 and 3
-    significant figures. For example, if 123,000 is provided, 123k as string is returned 
+    Returns a string of number represented with scientific prefixes. The precision is between 2 and 4
+    significant figures. For example, if 123,400 is provided, 123.4k as string is returned 
+    for numbers less than 4 precision, zeros will be padded at the beginning of the number
     
     Parameter
     ---------
@@ -112,13 +113,14 @@ def float2SI(number):
     """
     mantissa, exponent = f"{number:e}".split("e")
     units = {
-        0:' ',
+        0:'',
         1:'k',  2:'M',  3:'G',  4:'T',  5:'P',  6:'E',  7:'Z',  8:'Y',  9:'R',  10:'Q',
         -1:'m', -2:'\u03BC', -3:'n', -4:'p', -5:'f', -6:'a', -7:'z', -8:'y', -9:'r', -10:'q' }
 
     digits = float(mantissa)*pow(10, int(exponent)%3)
-    num = '{:>{}}'.format(str(round(digits)), 3)
     prefix = units.get(int(exponent)//3, None)
+    decimal_place = 1 if prefix != '' else 2 
+    num = '{:.1f}'.format(round(digits, decimal_place)).zfill(4 + decimal_place)
 
     return num+prefix
 
