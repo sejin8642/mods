@@ -310,3 +310,38 @@ def interact_plot(
 
     plt.axis([x_min, x_max, y_min, y_max])    
     plt.show()
+
+def print_fn(*args, num=10):
+    """
+    Prints the input objects up to the line num. It is useful to limit the output length of print
+    in order to see multiple prints all at once on Jupyter lab.
+    
+    Parameter
+    ---------
+    args: tuple
+        Tuple of multiple input objects
+    num: int
+        Line number of strings to truncate after (default 10)
+    """
+    # get each object to print
+    for arg in args:
+        # initialize first index, end string, and object string
+        ind = 0
+        end_str = ' ............'
+        arg_str = arg.__str__()
+
+        # iterate num times to find num-th index of '\n' for arg_str
+        for count in range(num):
+            new_ind = arg_str[ind:].find('\n')
+
+            # stop iterating if there are fewer than num lines in the string
+            if new_ind == -1:
+                ind = new_ind
+                end_str = ''
+                break
+
+            # update the index until it reaches num-th line
+            ind = new_ind + ind + 2
+            
+        # print the string until num-th line
+        print(arg_str[:ind-2] + end_str + '\n\n')
