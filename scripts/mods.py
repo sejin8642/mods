@@ -2,6 +2,10 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import qmc
+from functools import partial
+
+from ipywidgets import Checkbox, HBox, FloatSlider, Layout, interactive_output
 
 class FUNCS:
     """
@@ -245,18 +249,42 @@ def graph(
 
 def interact_plot(
     x,
-    Y, 
+    Y,
+    names=None,
     x_scale=1, 
     y_scale=1, 
     x_position=0,
     y_position=0,
-    grid=False):
-    
+    grid=False,
+    **Y_dict):
     """
     function to plot multiple graphs, and it allows to change the scale and position of 
     a part of the graph you are looking at. With ipywidgets.interact, this allows
     to dynamically change the position and scale of the part of the graph to inspect the
-    data easily
+    data easily. First, from ipywidgets import interact. Then from functools import partial.
+
+    Examples
+    --------
+    x = np.linspace(-5.0, 5.0, 101)
+    sin = np.sin(x)
+    cos = np.cos(x)
+
+    # from functools import partial first
+    trigs = partial(interact_plot, x, [sin, cos])
+
+    # name the function to avoid AttributeError:
+    trigs.__name__ = 'interactive function'
+
+    # from ipywidgets import interact first
+    interact(
+        trigs,
+        x_scale=(0.01, 1, 0.01), 
+        y_scale=(0.01, 1, 0.01), 
+        x_position=(-1, 1, 0.02),
+        y_position=(-1, 1, 0.02),
+        grid=True,
+        None
+    )
     
     Parameter
     ---------
@@ -264,6 +292,8 @@ def interact_plot(
         Domain of the graph
     y: numpy array[float]
         Range of the graph
+    names: list[str]
+        list of name strings for each Y (default None)
     x_scale: float
         Scale of the graph along x-axis to be viewed. The value is between 0 and 1 (default 1)
     y_scale: float
@@ -276,19 +306,28 @@ def interact_plot(
         between -1 and 1 (default 0)
     grid: bool
         If true, grid is shown on the graph (default False)
+    **Y_dict: dict[name:bool]
+        dictionary containing name strings and bools for each Y
     """
-    x_scale = np.clip(x_scale, 0, 1)
-    y_scale = np.clip(y_scale, 0, 1)
+    # initialization of scale, min, max for axes and gridlines
+    x_scale = np.clip(x_scale, 0, 1.2)
+    y_scale = np.clip(y_scale, 0, 1.2)
     x_min = x[0]
     x_max = x[-1]
+    y_min = np.min(Y)
+    y_max = np.max(Y)
+    y_height = y_max - y_min
+    y_min = y_min - 0.05*y_height 
+    y_max = y_max + 0.05*y_height 
     plt.grid(grid)
-    y_min = np.min(Y[0])
-    y_max = np.max(Y[0])
-    
-    for y in Y:
-        y_min = np.min([y_min, np.min(y)])
-        y_max = np.max([y_max, np.max(y)])        
-        plt.plot(x, y)
+
+    number_Y = len(Y) # number of total possible plots
+
+    # generate grid points and plot toggled graphs
+    grid_points = grid_sequence(number_Y)
+    for i, (key, item) in enumerate(Y_dict.items()):
+        if item == True: 
+            plt.plot(x, Y[i], color=grid_points[i], label=key)
     
     x_mid = (x_max + x_min)/2.0
     y_mid = (y_max + y_min)/2.0
@@ -345,3 +384,127 @@ def print_fn(*args, num=10):
             
         # print the string until num-th line
         print(arg_str[:ind-2] + end_str + '\n\n')
+
+def grid_sequence(num_points):
+    """
+    Generate grid sequence of RGB space from a positive integer such that the number of
+    grid points are greater than or equal to the input number. 
+
+    parameter
+    ---------
+    num_points: int
+        minimum number of grid points
+
+    return
+    ------
+    grid_points: numpy array
+        numpy array that contains grid points for RGB coloring
+    """
+    # pick three base numbers for grid points distribution
+    base1 = base2 = base3 = np.floor(num_points**(1/3))
+    if base1*base2*base3 < num_points:
+        base1 += 1
+    if base1*base2*base3 < num_points:
+        base2 += 1
+    if base1*base2*base3 < num_points:
+        base3 += 1
+
+    # from number of grid points, generate grid_points
+    num_points_per_dim = [int(base1), int(base2), int(base3)]
+    grid_fn = partial(np.linspace, 0.0, 1.0, endpoint=True)
+    intervals = [grid_fn(num_points) for num_points in num_points_per_dim]
+    grid_points = np.meshgrid(*intervals, indexing='ij')
+    grid_points = np.stack(grid_points, axis=-1).reshape(-1, 3)
+    return grid_points
+
+def interactive_graph(x, Y, Y_names=None):
+    """
+    Takes x-axis domain as a numpy array and a list of y-axis ranges to plot. Additionally
+    you can also provide names for each y axis graph. This graph fn allows to plot multiple
+    graphs and change the scale and position of the view. You can also check/uncheck a plot
+    to appear on the view
+   
+    Example
+    -------
+    x = np.linspace(0, 2*np.pi, 101) # x domain
+    RD = np.random.random # numpy random generator fn
+    N = 4 # number of plots
+    Y = [RD()*np.sin(4*RD()*x + 2*np.pi*RD()) for _ in range(N)] # N graphs
+    Y_names = ['first', 'second', 'third', 'forth'] # names for each y graph
+    mods.interactive_graph(x, Y, Y_names=Y_names)
+
+    Parameters
+    ----------
+    x: numpy array
+        numpy array of x domain for graph
+    Y: list[numpy array]
+        list of numpy arrays
+    Y_names: list[str]
+        list of y graph name strings
+    """
+    # sliders for scale and position of the plot view
+    x_scale=FloatSlider(
+        value=1,
+        min=0.01,
+        max=1.0,
+        step=0.01,
+        description="x scale")
+    y_scale=FloatSlider(
+        value=1,
+        min=0.01,
+        max=1.0,
+        step=0.01,
+        description="y scale")
+    x_position=FloatSlider(
+        value=0,
+        min=-1,
+        max=1,
+        step=0.02,
+        description="x pos")
+    y_position=FloatSlider(
+        value=0,
+        min=-1,
+        max=1,
+        step=0.02,
+        description="y pos")
+
+    # to make user interface for scale and position sliders
+    ui1 = HBox([x_scale, y_scale])
+    ui2 = HBox([x_position, y_position])
+
+    # Checkbox method shortened
+    CB = partial(
+        Checkbox,
+        value=True,
+        indent=False,
+        layout=Layout(width='100px', height='50px'))
+
+    # first check box (gridlines)
+    grid = CB(description=f'grid') 
+
+    # create a function to return Y graphs names
+    if Y_names == None:
+        names = lambda i: f'plot {i}'
+    else:
+        names = lambda i: Y_names[i]
+
+    # check boxes and descpription dict for Y graphs
+    N = len(Y)
+    cbs = [CB(description=names(i)) for i in range(N)]
+    Y_dict = {cb.description: cb for cb in cbs}
+    ui3 = HBox([grid, *cbs])
+
+    # from functools import partial first
+    plot_fn = partial(interact_plot, x, Y)
+
+    # display interactive plot
+    inputs = {
+        'x_scale': x_scale,
+        'y_scale': y_scale,
+        'x_position': x_position,
+        'y_position': y_position,
+        'grid': grid,
+        **Y_dict
+    }
+    out = interactive_output(plot_fn, inputs)
+    display(ui1, ui2, out, ui3)
