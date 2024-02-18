@@ -256,6 +256,8 @@ def interact_plot(
     x_position=0,
     y_position=0,
     grid=False,
+    x_size=800,
+    y_size=600,
     **Y_dict):
     """
     function to plot multiple graphs, and it allows to change the scale and position of 
@@ -306,9 +308,17 @@ def interact_plot(
         between -1 and 1 (default 0)
     grid: bool
         If true, grid is shown on the graph (default False)
+    figure_size: (int, int)
+        figure size in pixels in horizontal and vertical axes (default (800, 600))
     **Y_dict: dict[name:bool]
         dictionary containing name strings and bools for each Y
     """
+    # figure size setting
+    dpi = 96  # Adjust based on your needs
+    figure_width_inches = x_size / dpi
+    figure_height_inches = y_size / dpi
+    plt.figure(figsize=(figure_width_inches, figure_height_inches))
+
     # initialization of scale, min, max for axes and gridlines
     x_scale = np.clip(x_scale, 0, 1.2)
     y_scale = np.clip(y_scale, 0, 1.2)
@@ -442,7 +452,7 @@ def interactive_graph(x, Y, Y_names=None):
     Y_names: list[str]
         list of y graph name strings
     """
-    # sliders for scale and position of the plot view
+    # sliders for scale and position of the plot view and figure size
     x_scale=FloatSlider(
         value=1,
         min=0.01,
@@ -467,6 +477,18 @@ def interactive_graph(x, Y, Y_names=None):
         max=1,
         step=0.02,
         description="y pos")
+    x_size=FloatSlider(
+        value=800,
+        min=0,
+        max=1600,
+        step=1,
+        description="x size")
+    y_size=FloatSlider(
+        value=600,
+        min=0,
+        max=1200,
+        step=1,
+        description="y size")
 
     # to make user interface for scale and position sliders
     ui1 = HBox([x_scale, y_scale])
@@ -493,6 +515,7 @@ def interactive_graph(x, Y, Y_names=None):
     cbs = [CB(description=names(i)) for i in range(N)]
     Y_dict = {cb.description: cb for cb in cbs}
     ui3 = HBox([grid, *cbs])
+    ui4 = HBox([x_size, y_size])
 
     # from functools import partial first
     plot_fn = partial(interact_plot, x, Y)
@@ -504,7 +527,9 @@ def interactive_graph(x, Y, Y_names=None):
         'x_position': x_position,
         'y_position': y_position,
         'grid': grid,
+        'x_size': x_size,
+        'y_size': y_size,
         **Y_dict
     }
     out = interactive_output(plot_fn, inputs)
-    display(ui1, ui2, out, ui3)
+    display(ui1, ui2, out, ui3, ui4)
