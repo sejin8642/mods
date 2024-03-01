@@ -258,6 +258,7 @@ def interact_plot(
     grid=False,
     x_size=800,
     y_size=600,
+    marker_size=6.0,
     **Y_dict):
     """
     function to plot multiple graphs, and it allows to change the scale and position of 
@@ -337,7 +338,7 @@ def interact_plot(
     grid_points = grid_sequence(number_Y)
     for i, (key, item) in enumerate(Y_dict.items()):
         if item == True: 
-            plt.plot(x, Y[i], color=grid_points[i], label=key)
+            plt.plot(x, Y[i], color=grid_points[i], label=key, linewidth=marker_size)
     
     x_mid = (x_max + x_min)/2.0
     y_mid = (y_max + y_min)/2.0
@@ -489,6 +490,12 @@ def interactive_graph(x, Y, Y_names=None):
         max=1200,
         step=1,
         description="y size")
+    marker_size=FloatSlider(
+        value=1.0,
+        min=0,
+        max=3.0,
+        step=0.1,
+        description="line width")
 
     # to make user interface for scale and position sliders
     ui1 = HBox([x_scale, y_scale])
@@ -515,7 +522,7 @@ def interactive_graph(x, Y, Y_names=None):
     cbs = [CB(description=names(i)) for i in range(N)]
     Y_dict = {cb.description: cb for cb in cbs}
     ui3 = HBox([grid, *cbs])
-    ui4 = HBox([x_size, y_size])
+    ui4 = HBox([x_size, y_size, marker_size])
 
     # from functools import partial first
     plot_fn = partial(interact_plot, x, Y)
@@ -529,6 +536,7 @@ def interactive_graph(x, Y, Y_names=None):
         'grid': grid,
         'x_size': x_size,
         'y_size': y_size,
+        'marker_size': marker_size,
         **Y_dict
     }
     out = interactive_output(plot_fn, inputs)
